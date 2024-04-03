@@ -1,0 +1,14 @@
+# Build
+
+build-oatpp/
+build-json/
+build-opentelemetry-cpp/
+build-protobuf/
+
+cpp-client/otel-cpp-starter/build-roll-dice/
+
+# Sandbox
+
+sandbox/
+
+
