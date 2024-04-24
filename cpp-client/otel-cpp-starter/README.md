@@ -25,6 +25,13 @@ itself, when using the OTLP HTTP exporter.
 For convenience, git submodules are added under the top level directory,
 which is henceforth referred to as ${DEMO_TOPDIR}
 
+Version of each submodule used:
+
+* oatpp, tag 1.3.0-latest
+* json, tag v3.11.3
+* protobuf, tag v3.19.4
+* opentelemetry-cpp, tag v1.15.0
+
 ```bash
 export DEMO_TOPDIR=<the path where this repository is cloned>
 ```
@@ -69,6 +76,7 @@ cd ${DEMO_TOPDIR}/build-json
 
 cmake \
   -DCMAKE_INSTALL_PREFIX=${DEMO_TOPDIR}/sandbox \
+  -DJSON_BuildTests=OFF \
   ../third_party/json
 
 make
@@ -101,7 +109,7 @@ For convenience, the opentelemetry-cpp repository is added under
 third_party/opentelemetry-cpp, as a git submodule.
 
 opentelemetry-cpp needs a lot of dependencies,
-for detailed instructions, see 
+for detailed instructions, see
 https://github.com/open-telemetry/opentelemetry-cpp/blob/main/INSTALL.md
 
 Assuming all the required dependencies are available:
@@ -168,8 +176,6 @@ tar xvf mysql-8.3.0-linux-glibc2.28-x86_64.tar.xz \
   -C ${DEMO_TOPDIR}/sandbox
 ```
 
-
-
 # Roll-dice server
 
 ## Build
@@ -180,6 +186,7 @@ mkdir ${DEMO_TOPDIR}/cpp-client/otel-cpp-starter/build-roll-dice
 cd ${DEMO_TOPDIR}/cpp-client/otel-cpp-starter/build-roll-dice
 
 cmake \
+  -DCMAKE_INSTALL_PREFIX=${DEMO_TOPDIR}/sandbox \
   -DCMAKE_PREFIX_PATH="${DEMO_TOPDIR}/sandbox;" \
   ../roll-dice
 
@@ -188,4 +195,44 @@ make
 
 ## Run
 
+Make sure to start:
+
+* The MySQL server
+* The opentelemetry endpoint
+
+to get the full demo working.
+
+```bash
+cd ${DEMO_TOPDIR}/cpp-client/otel-cpp-starter/build-roll-dice
+
+./dice-server
+```
+
+The server should print a message like:
+
+```
+[malff@malff-desktop build-roll-dice]$ ./dice-server
+ I |2024-04-24 17:39:15 1713973155902753| Dice Server:Server running on port 8080
+```
+
+Open a browser on URL `http://localhost:8080/rolldice`,
+it will print the dice rolled.
+Hit refresh to roll more dices.
+
+When the MySQL server is not running, the roll-dice server will show errors:
+
+```
+# ERR: SQLException in /data/malff/CODE/MARC_GITHUB/mysql-opentelemetry-demo/cpp-client/otel-cpp-starter/roll-dice/main.cpp(EXAMPLE_FUNCTION) on line 74
+# ERR: Unable to connect to localhost (MySQL error code: 2003, SQLState: HY000 )
+```
+
+When the opentelemetry endpoint is not running, the roll-dice server will
+show errors:
+
+```
+[Error] File: /data/malff/CODE/MARC_GITHUB/mysql-opentelemetry-demo/third_party/opentelemetry-cpp/exporters/otlp/src/otlp_http_client.cc:204 [OTLP HTTP Client] Session state: connection failed.Failed to connect to localhost port 4318: Connection refused
+[Error] File: /data/malff/CODE/MARC_GITHUB/mysql-opentelemetry-demo/third_party/opentelemetry-cpp/exporters/otlp/src/otlp_http_exporter.cc:130 [OTLP TRACE HTTP Exporter] ERROR: Export 1 trace span(s) error: 1
+```
+
+To stop the roll-dice server, hit `CTRL-C`.
 

@@ -47,9 +47,9 @@ void CleanupTracer() {
 } // namespace
 
 static const char *url = "tcp://127.0.0.1:13000";
-static const char *user = "root";
-static const char *pass = "";
-static const char *database = "test";
+static const char *user = "app";
+static const char *pass = "demo123";
+static const char *database = "demo";
 
 void RecordDice(int dice) {
   try {
@@ -61,13 +61,8 @@ void RecordDice(int dice) {
 
     std::unique_ptr<sql::Statement> stmt{con->createStatement()};
 
-#if 0
-    std::unique_ptr<sql::ResultSet> res{
-        stmt->executeQuery("SELECT 'Welcome to Connector/C++' AS _message")};
-#endif
-
     std::unique_ptr<sql::PreparedStatement> prep_stmt{
-        con->prepareStatement("INSERT INTO test.roll(dice) VALUES (?)")};
+        con->prepareStatement("INSERT INTO demo.roll(dice) VALUES (?)")};
 
     prep_stmt->setInt(1, dice);
     prep_stmt->execute();
