@@ -28,9 +28,7 @@ which is henceforth referred to as ${DEMO_TOPDIR}
 Version of each submodule used:
 
 * oatpp, tag 1.3.0-latest
-* json, tag v3.11.3
-* protobuf, tag v3.19.4
-* opentelemetry-cpp, tag v1.15.0
+* opentelemetry-cpp, tag v1.24.0
 
 ```bash
 export DEMO_TOPDIR=<the path where this repository is cloned>
@@ -67,42 +65,6 @@ make
 make install
 ```
 
-## nlohmann_json
-
-```bash
-mkdir ${DEMO_TOPDIR}/build-json
-
-cd ${DEMO_TOPDIR}/build-json
-
-cmake \
-  -DCMAKE_INSTALL_PREFIX=${DEMO_TOPDIR}/sandbox \
-  -DJSON_BuildTests=OFF \
-  ../third_party/json
-
-make
-
-make install
-```
-
-## protobuf
-
-```bash
-mkdir ${DEMO_TOPDIR}/build-protobuf
-
-cd ${DEMO_TOPDIR}/build-protobuf
-
-cmake \
-  -DCMAKE_INSTALL_PREFIX=${DEMO_TOPDIR}/sandbox \
-  -DCMAKE_BUILD_TYPE=Release \
-  -Dprotobuf_BUILD_SHARED_LIBS=ON \
-  -Dprotobuf_BUILD_TESTS=OFF \
-  ../third_party/protobuf/cmake
-
-make
-
-make install
-```
-
 ## opentelemetry-cpp
 
 For convenience, the opentelemetry-cpp repository is added under
@@ -119,12 +81,19 @@ Assuming all the required dependencies are available:
 the build should look like this:
 
 ```bash
+cd ${DEMO_TOPDIR}/third_party/opentelemetry-cpp
+
+git submodule init
+
+git submodule update
+
 mkdir ${DEMO_TOPDIR}/build-opentelemetry-cpp
 
 cd ${DEMO_TOPDIR}/build-opentelemetry-cpp
 
 cmake \
   -DCMAKE_INSTALL_PREFIX=${DEMO_TOPDIR}/sandbox \
+  -DOTELCPP_PROTO_PATH=../third_party/opentelemetry-cpp/third_party/opentelemetry-proto \
   -DWITH_OTLP_HTTP=ON \
   -DBUILD_TESTING=OFF \
   ../third_party/opentelemetry-cpp
@@ -146,10 +115,10 @@ https://dev.mysql.com/doc/connector-cpp/8.3/en/connector-cpp-opentelemetry.html
 
 Assuming the installation method used is to download,
 for example using
-mysql-connector-c++-8.3.0-linux-glibc2.28-x86-64bit.tar.gz,
+mysql-connector-c++-9.6.0-linux-glibc2.28-x86-64bit.tar.gz,
 
 ```bash
-tar xvf mysql-connector-c++-8.3.0-linux-glibc2.28-x86-64bit.tar.gz \
+tar xvf mysql-connector-c++-9.6.0-linux-glibc2.28-x86-64bit.tar.gz \
   --strip-components=1 \
   -C ${DEMO_TOPDIR}/sandbox
 ```
@@ -168,10 +137,10 @@ https://dev.mysql.com/doc/refman/8.3/en/
 
 Assuming the installation method used is to download,
 for example using
-mysql-8.3.0-linux-glibc2.28-x86_64.tar.xz
+mysql-9.6.0-linux-glibc2.28-x86_64.tar.xz
 
 ```bash
-tar xvf mysql-8.3.0-linux-glibc2.28-x86_64.tar.xz \
+tar xvf mysql-9.6.0-linux-glibc2.28-x86_64.tar.xz \
   --strip-components=1 \
   -C ${DEMO_TOPDIR}/sandbox
 ```
@@ -187,7 +156,7 @@ cd ${DEMO_TOPDIR}/cpp-client/otel-cpp-starter/build-roll-dice
 
 cmake \
   -DCMAKE_INSTALL_PREFIX=${DEMO_TOPDIR}/sandbox \
-  -DCMAKE_PREFIX_PATH="${DEMO_TOPDIR}/sandbox;" \
+  -DCMAKE_PREFIX_PATH="${DEMO_TOPDIR}/sandbox" \
   ../roll-dice
 
 make

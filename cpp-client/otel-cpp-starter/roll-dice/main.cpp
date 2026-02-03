@@ -4,6 +4,7 @@
 
 #include "opentelemetry/exporters/ostream/span_exporter_factory.h"
 #include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
+#include <opentelemetry/sdk/resource/resource.h>
 #include "opentelemetry/sdk/trace/exporter.h"
 #include "opentelemetry/sdk/trace/processor.h"
 #include "opentelemetry/sdk/trace/simple_processor_factory.h"
@@ -16,29 +17,40 @@
 #include <ctime>
 #include <string>
 
+const int port_number = 8080;
+
 using namespace std;
 namespace trace_api = opentelemetry::trace;
 namespace trace_sdk = opentelemetry::sdk::trace;
-namespace trace_exporter = opentelemetry::exporter::trace;
 
 namespace {
 void InitTracer() {
 
-#ifdef DEBUG
-  auto exporter = trace_exporter::OStreamSpanExporterFactory::Create();
-#else
+  opentelemetry::sdk::resource::ResourceAttributes attributes;
+
+  // TODO: use semconv header files.
+
+  attributes["service.namespace"] = std::string{"demo"};
+  attributes["service.name"] = std::string{"dice-server"};
+  attributes["service.instance.id"] = std::to_string(port_number);
+
+  static std::string schema_url{"demo"};
+  const opentelemetry::sdk::resource::Resource resource =
+      opentelemetry::sdk::resource::Resource::Create(attributes,
+                                                     schema_url);
+
   auto exporter = opentelemetry::exporter::otlp::OtlpHttpExporterFactory::Create();
-#endif
 
   auto processor =
       trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
 
   std::shared_ptr<opentelemetry::trace::TracerProvider> provider =
-      trace_sdk::TracerProviderFactory::Create(std::move(processor));
+      trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
 
   // set the global trace provider
   trace_api::Provider::SetTracerProvider(provider);
 }
+
 void CleanupTracer() {
   std::shared_ptr<opentelemetry::trace::TracerProvider> none;
   trace_api::Provider::SetTracerProvider(none);
@@ -113,7 +125,7 @@ void run() {
 
   auto connectionProvider =
       oatpp::network::tcp::server::ConnectionProvider::createShared(
-          {"localhost", 8080, oatpp::network::Address::IP_4});
+          {"localhost", port_number, oatpp::network::Address::IP_4});
 
   oatpp::network::Server server(connectionProvider, connectionHandler);
 
